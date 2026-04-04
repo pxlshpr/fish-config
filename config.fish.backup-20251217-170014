@@ -1,0 +1,118 @@
+alias y='yt-dlp'
+alias y-stable='sudo yt-dlp -U stable'
+alias y-legacy='sudo yt-dlp --update-to 2022.07.18'
+alias yc='yt-dlp --cookies ~/Downloads/youtube.com_cookies.txt'
+alias ynp='yt-dlp --no-playlist'
+alias o='open .'
+alias s='ssh ahmed@172.105.57.178'
+alias sz='ssh root@172.105.179.31'
+alias gb='git add .; git commit -a -m "bump"; git push'
+alias gp='git pull'
+alias gl='git log --oneline'
+#alias x='xed .'
+alias xcode-open='bash ~/Developer/scripts/xcode-open.sh'
+alias xp='xed .'
+alias prep-update='bash ~/Developer/scripts/update-prep_server.sh'
+alias prep-recreate='bash ~/Developer/scripts/recreate-prep.sh'
+alias prep-restore-server='bash ~/Developer/scripts/restore-prep-server.sh'
+alias prep-restore-local='bash ~/Developer/scripts/restore-prep-local.sh'
+alias ut='bash ~/Developer/scripts/ut.sh'
+
+alias gs='git status'
+
+# Latest Git Tag
+alias glt='git describe --tags --abbrev=0'
+
+alias p='python'
+
+# displayplacer (https://github.com/jakehilborn/displayplacer)
+alias display-3-portrait='displayplacer "id:E27B8117-950A-0C4A-0857-D6964E3302DB res:1440x2560 hz:60 color_depth:8 scaling:on origin:(0,0) degree:90" "id:37D8832A-2D66-02CA-B9F7-8F30A301B230 res:1440x900 hz:60 color_depth:8 scaling:on origin:(1440,835) degree:0" "id:CF64A3CC-70DC-9713-C90B-A2661D91F570 res:1366x1024 hz:60 color_depth:4 scaling:on origin:(-1366,1171) degree:0"'
+#alias display-3-landscape=''
+
+set -gx PATH /opt/local/bin opt/local/sbin /opt/homebrew/bin $PATH
+
+function vk
+        set -l processId (psb | tr -s ' ' | cut -d ' ' -f 2 | head -n 1)
+        kill -9 $processId
+        echo "Killed vapor server with pid: $processId"
+end
+
+function gt
+	set -l lastBuild (git describe --tags --abbrev=0 | cut -d'.' -f3)
+	
+	set -l regex (string join '' 's/^\(.*\)' $lastBuild '$/\1/')
+	set -l prefix (git describe --tags --abbrev=0 | sed $regex)
+	set -l nextBuild (math $lastBuild + 1)
+	set -l nextTag (string join '' $prefix $nextBuild)
+	
+	git add .
+	git commit -a -m "tag increment"
+	git push
+	git tag $nextTag
+	git push --tags
+end
+
+function gp
+    if test (count $argv) -eq 0
+        echo "Usage: gp \"commit message\""
+        return 1
+    end
+
+    git add .
+    git commit -a -m "$argv"
+    git push
+end
+
+alias psb='ps -eaf | grep .build'
+alias vr='vk; vapor run'
+alias vm='vapor run migrate'
+
+function gc
+	command git add .
+	command git commit -a -m "$argv"
+	command git push
+end
+
+# Temporary function for recreating choons (DELETE once production starts so we don't accidentally call this)
+function reset-choons
+    dropdb -U pxlshpr choons
+    createdb -U pxlshpr choons
+	cd ~/Developer/choons/Server
+	vm
+	cd Backups/gold-master
+	bash restore-tables.sh
+end
+
+function gz
+	gb
+
+	printf "\
+	fish
+	gvr
+  	" | sz
+end
+
+function x
+	if count $argv > /dev/null
+		cd $argv
+		xcode-open
+		cd ..
+	else
+		xcode-open
+	end
+end
+
+alias token='~/github/scripts/token.sh'
+
+fish_ssh_agent
+
+function __apply_bobthefish_scheme --on-event fish_prompt
+    if string match -q "Dark" (defaults read -g AppleInterfaceStyle ^/dev/null)
+        set -g theme_color_scheme dark
+    else
+        set -g theme_color_scheme light
+    end
+end
+
+cd ~/Developer
+export PATH="$HOME/.local/bin:$PATH"
