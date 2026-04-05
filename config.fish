@@ -13,7 +13,7 @@ end
 cd ~
 
 function __apply_bobthefish_scheme --on-event fish_prompt
-    if string match -q "Dark" (defaults read -g AppleInterfaceStyle ^/dev/null)
+    if string match -q "Dark" (defaults read -g AppleInterfaceStyle 2>/dev/null)
         set -g theme_color_scheme dark
     else
         set -g theme_color_scheme light
