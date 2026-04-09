@@ -21,5 +21,9 @@ function __apply_bobthefish_scheme --on-event fish_prompt
 end
 
 if status is-interactive
-    p
+    if test (hostname -s) = pxlbook
+        p
+    else
+        cd ~/
+    end
 end
