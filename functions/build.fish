@@ -1,8 +1,8 @@
-function run
+function build
     # Only run on hephaestus (retries up to 3 times for flaky network discovery)
     set -l heph_line (__find_hephaestus)
     if test $status -ne 0
-        echo "hephaestus not connected — run only works on hephaestus"
+        echo "hephaestus not connected — build only works on hephaestus"
         return 1
     end
 
@@ -27,10 +27,6 @@ function run
 
     # Get build settings (need destination to get correct device paths)
     set -l dest "platform=iOS,id=$uuid"
-    set -l settings (xcodebuild -project "$xcodeproj" -scheme "$scheme" -destination "$dest" -showBuildSettings 2>/dev/null)
-    set -l products_dir (printf '%s\n' $settings | grep '^ *BUILT_PRODUCTS_DIR' | awk '{print $3}')
-    set -l product_name (printf '%s\n' $settings | grep '^ *FULL_PRODUCT_NAME' | awk '{print $3}')
-    set -l bundle_id (printf '%s\n' $settings | grep '^ *PRODUCT_BUNDLE_IDENTIFIER' | awk '{print $3}')
 
     # Build (-quiet, stderr suppressed for warnings, Ctrl+C works)
     xcodebuild -quiet -project "$xcodeproj" -scheme "$scheme" -destination "$dest" build 2>/dev/null
@@ -41,10 +37,5 @@ function run
         return 1
     end
 
-    # Install and launch
-    echo "Installing and launching..."
-    xcrun devicectl device install app --device "$uuid" "$products_dir/$product_name" 2>&1 | tail -3
-    and xcrun devicectl device process launch --device "$uuid" "$bundle_id" 2>&1 | tail -3
-
-    echo "Done — $scheme running on $device_name"
+    echo "Done — $scheme built successfully for $device_name"
 end
