@@ -1,5 +1,5 @@
 function p -d "cd into a Developer project"
-    set -l base_projects Chunes Fade NutriKit Pace Spare Tasks Zones
+    set -l base_projects Chunes Fade Lazeez NutriKit Pace Spare Tasks Zones
 
     # Collect branch dirs (e.g. NutriKit-443)
     set -l branch_projects
@@ -27,7 +27,7 @@ function p -d "cd into a Developer project"
 
     set -l base_entries
     for proj in $base_projects
-        set -l dir ~/Developer/$proj
+        set -l dir (__p_path $proj)
         set -l ts 0
         if test -f $dir/.git/index
             set ts (stat -f '%m' $dir/.git/index)
@@ -44,6 +44,15 @@ function p -d "cd into a Developer project"
     set -l selected (printf '%s\n' $ordered | gum choose --header "Projects")
 
     if test -n "$selected"
-        cd ~/Developer/$selected
+        cd (__p_path $selected)
+    end
+end
+
+function __p_path
+    switch $argv[1]
+        case Lazeez
+            echo $HOME"/Developer/Lazeez Menu/lazeez-menu"
+        case '*'
+            echo $HOME"/Developer/$argv[1]"
     end
 end
